@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gui.dao.UserDao">
+    <!-- 配置查询所有 -->
+    <select id="findAll" resultType="com.gui.domain.User">
+        select * from user1026;
+    </select>
+    <!-- 保存用户 -->
+    <insert id="saveUser" parameterType="com.gui.domain.User">
+        insert into user1026(username,address,gender,birthday)values(#{username},#{address},#{gender},#{birthday});
+        <!-- 插入操作后，通过获取auto_increment的值来得到id值:keyProperty指id的属性名称，对应实体类
+            keyColumn：id的列名，对应数据库表  order：指什么时候获取操作
+        -->
+        <selectKey keyProperty="id" resultType="java.lang.Integer" keyColumn="id" order="AFTER">
+            select last_insert_id();
+        </selectKey>
+    </insert>
+    <!-- 更新用户 -->
+    <update id="userUpdate" parameterType="com.gui.domain.User">
+        update user1026 set username=#{username},address=#{address},gender=#{gender},birthday=#{birthday} where id=#{id};
+    </update>
+    <!-- 删除用户 -->
+    <delete id="userDelete" parameterType="java.lang.Integer">
+        delete from user1026 where id=#{id};
+    </delete>
+    <!-- 根据id查询 -->
+    <select id="findById" parameterType="java.lang.Integer" resultType="com.gui.domain.User">
+        select * from user1026 where id=#{id};
+    </select>
+    <!-- 根据名字模糊查询 -->
+    <select id="findByName" resultType="com.gui.domain.User" parameterType="java.lang.String">
+        <!-- select * from user1026 where username like '%${value}%'; //这种不常用且不灵活-->
+        select * from user1026 where username like #{username};
+    </select>
+    <!-- 总的用户数量 -->
+    <select id="findTotal" resultType="java.lang.Integer">
+        select count(*) from user1026;
+    </select>
+    <!-- 根据queryVo的条件模糊查询 -->
+    <select id="findUserByVo" parameterType="com.gui.domain.QueryVo" resultType="com.gui.domain.User">
+        select * from user1026 where username like #{user.username}
+    </select>
+    <!-- 根据条件查询 -->
+    <!--<select id="findUserByCondition" resultType="com.gui.domain.User" parameterType="com.gui.domain.User">
+        select * from user1026 where 1=1
+        <if test="username != null">
+            and username=#{username}
+        </if>
+        <if test="id != 0">
+            and id = #{id}
+        </if>
+    </select>-->
+    <!-- 根据条件查询 -->
+    <select id="findUserByCondition" resultType="com.gui.domain.User" parameterType="com.gui.domain.User">
+        <include refid="defaultUser"></include>
+        <where>
+            <if test="username != null">
+                and username=#{username}
+            </if>
+            <if test="id != 0">
+                and id = #{id}
+            </if>
+        </where>
+    </select>
+    <!-- 抽取重复的SQL语句,不要加; -->
+    <sql id="defaultUser">
+        select * from user1026
+    </sql>
+    <select id="findUserInIds" resultType="com.gui.domain.QueryVo" parameterType="com.gui.domain.QueryVo">
+        select * from user1026
+        <where>
+            <if test="ids != null and ids.size() > 0">
+                <foreach collection="ids" open="and id in (" close=")" item="id" separator=",">
+                    #{id}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
+</mapper>
